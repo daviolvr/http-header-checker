@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"http-header-checker/checker"
 )
 
 func main() {
-	url := "https://example.com"
+	url := "http://127.0.0.1:8000/api/v1/auth/me/"
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -15,8 +17,6 @@ func main() {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("Headers da resposta:")
-	for key, value := range resp.Header {
-		fmt.Printf("%s: %s\n", key, value)
-	}
+	fmt.Println("Analisando:", url)
+	checker.CheckSecurityHeaders(resp.Header)
 }
