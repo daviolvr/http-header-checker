@@ -1,7 +1,6 @@
 package checker
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -17,15 +16,17 @@ var securityHeaders = []string{
 }
 
 // Função que recebe os headers da resposta e imprime os de segurança
-func CheckSecurityHeaders(headers http.Header) {
-	fmt.Println("Verificando headers de segurança:")
+func CheckSecurityHeaders(headers http.Header) map[string]string {
+	results := make(map[string]string)
 
 	for _, header := range securityHeaders {
 		value := headers.Get(header)
 		if value == "" {
-			fmt.Printf("[!] Faltando: %s\n", header)
+			results[header] = "MISSING"
 		} else {
-			fmt.Printf("[OK] %s: %s\n", header, value)
+			results[header] = value
 		}
 	}
+
+	return results
 }

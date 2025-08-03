@@ -1,0 +1,12 @@
+{
+ "url": "https://google.com",
+ "headers": {
+  "Content-Security-Policy": "MISSING",
+  "Permissions-Policy": "MISSING",
+  "Referrer-Policy": "MISSING",
+  "Strict-Transport-Security": "MISSING",
+  "X-Content-Type-Options": "MISSING",
+  "X-Frame-Options": "SAMEORIGIN",
+  "X-XSS-Protection": "0"
+ }
+}
