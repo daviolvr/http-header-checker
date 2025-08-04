@@ -15,6 +15,7 @@ func main() {
 	urlFlag := flag.String("url", "", "URL única para verificar os headers")
 	fileFlag := flag.String("file", "", "Arquivo com lista de URLs")
 	outputFlag := flag.String("output", "relatorio.json", "Nome do arquivo de saída")
+	csvFlag := flag.String("csv", "", "Nome do arquivo CSV de saída (opcional)")
 
 	flag.Parse()
 
@@ -61,6 +62,15 @@ func main() {
 	}
 
 	fmt.Println("Relatório salvo em:", *outputFlag)
+
+	if *csvFlag != "" {
+		err := report.SaveCSV(results, *csvFlag)
+		if err != nil {
+			fmt.Println("Erro ao salvar CSV:", err)
+		} else {
+			fmt.Println("CSV salvo em:", *csvFlag)
+		}
+	}
 }
 
 func processURL(url string) checker.Result {
