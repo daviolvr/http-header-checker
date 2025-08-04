@@ -44,14 +44,22 @@ func main() {
 		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
+		var urls []string
+
 		for scanner.Scan() {
 			url := strings.TrimSpace(scanner.Text())
-			if url == "" {
-				continue
+			if url != "" {
+				urls = append(urls, url)
 			}
-			result := processURL(url)
-			results = append(results, result)
 		}
+
+		if err := scanner.Err(); err != nil {
+			fmt.Println("Erro ao ler arquivo:", err)
+			return
+		}
+
+		fmt.Printf("Analisando %d URLs em paralelo com 10 workers...\n", len(urls))
+		results = processInParallel(urls, 10)
 	}
 
 	// Salva o relatório em JSON
@@ -75,4 +83,33 @@ func main() {
 
 func processURL(url string) checker.Result {
 	return checker.CheckURL(url)
+}
+
+func processInParallel(urls []string, numWorkers int) []checker.Result {
+	jobs := make(chan string, len(urls))
+	results := make(chan checker.Result, len(urls))
+
+	// Lança os workers
+	for i := 0; i < numWorkers; i++ {
+		go func() {
+			for url := range jobs {
+				results <- checker.CheckURL(url)
+			}
+		}()
+	}
+
+	// Envia as URLs para os workers
+	for _, url := range urls {
+		jobs <- url
+	}
+	close(jobs)
+
+	// Coleta os resultados
+	var allResults []checker.Result
+	for i := 0; i < len(urls); i++ {
+		result := <-results
+		allResults = append(allResults, result)
+	}
+
+	return allResults
 }
