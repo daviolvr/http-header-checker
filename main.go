@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"http-header-checker/checker"
 	"http-header-checker/report"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -26,7 +25,7 @@ func main() {
 		return
 	}
 
-	var results []report.HeaderResult
+	var results []checker.Result
 
 	// Se for uma URL única
 	if *urlFlag != "" {
@@ -64,21 +63,6 @@ func main() {
 	fmt.Println("Relatório salvo em:", *outputFlag)
 }
 
-func processURL(url string) report.HeaderResult {
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("Erro ao acessar %s: %s\n", url, err)
-		return report.HeaderResult{
-			URL:     url,
-			Headers: map[string]string{"erro": err.Error()}}
-	}
-	defer resp.Body.Close()
-
-	fmt.Println("Analisando:", url)
-	results := checker.CheckSecurityHeaders(resp.Header)
-
-	return report.HeaderResult{
-		URL:     url,
-		Headers: results,
-	}
+func processURL(url string) checker.Result {
+	return checker.CheckURL(url)
 }

@@ -2,17 +2,12 @@ package report
 
 import (
 	"encoding/json"
+	"http-header-checker/checker"
 	"os"
 )
 
-// Struct pra salvar o resultado da verificação
-type HeaderResult struct {
-	URL     string            `json:"url"`
-	Headers map[string]string `json:"headers"`
-}
-
 // Salva o resultado como JSON em um arquivo
-func SaveMultipleResultsToFile(results []HeaderResult, filename string) error {
+func SaveMultipleResultsToFile(results []checker.Result, filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

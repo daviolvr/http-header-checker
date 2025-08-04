@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -25,18 +26,45 @@ var headerDescriptions = map[string]string{
 	"X-XSS-Protection":          "Ativa (ou desativa) proteção contra XSS no navegador",
 }
 
+// Resultado combinado
+type Result struct {
+	URL     string `json:"url"`
+	Headers map[string]string
+	Score   string `json:"score"`
+}
+
 // Função que recebe os headers da resposta e imprime os de segurança
-func CheckSecurityHeaders(headers http.Header) map[string]string {
-	results := make(map[string]string)
+func CheckURL(url string) Result {
+	resp, err := http.Get(url)
+	if err != nil {
+		return Result{
+			URL:     url,
+			Headers: map[string]string{"Erro": err.Error()},
+			Score:   "0%",
+		}
+	}
+	defer resp.Body.Close()
+
+	headers := resp.Header
+	present := 0
+	total := len(securityHeaders)
+	resultHeaders := make(map[string]string)
 
 	for _, header := range securityHeaders {
 		value := headers.Get(header)
 		if value == "" {
-			results[header] = "MISSING - " + headerDescriptions[header]
+			resultHeaders[header] = "MISSING - " + headerDescriptions[header]
 		} else {
-			results[header] = value + " ✓ (" + headerDescriptions[header] + ")."
+			resultHeaders[header] = value + " ✓ (" + headerDescriptions[header] + ")."
+			present++
 		}
 	}
 
-	return results
+	score := fmt.Sprintf("%d/%d (%.0f%%)", present, total, (float64(present)/float64(total))*100)
+
+	return Result{
+		URL:     url,
+		Headers: resultHeaders,
+		Score:   score,
+	}
 }
