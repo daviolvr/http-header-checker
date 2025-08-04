@@ -12,7 +12,7 @@ type HeaderResult struct {
 }
 
 // Salva o resultado como JSON em um arquivo
-func SaveResultToFile(result HeaderResult, filename string) error {
+func SaveMultipleResultsToFile(results []HeaderResult, filename string) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -20,6 +20,6 @@ func SaveResultToFile(result HeaderResult, filename string) error {
 	defer file.Close()
 
 	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", " ") // pra deixar o JSON legível
-	return encoder.Encode(result)
+	encoder.SetIndent("", " ") // deixa o JSON legível
+	return encoder.Encode(results)
 }

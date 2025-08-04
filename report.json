@@ -1,12 +1,12 @@
 {
  "url": "https://google.com",
  "headers": {
-  "Content-Security-Policy": "MISSING",
-  "Permissions-Policy": "MISSING",
-  "Referrer-Policy": "MISSING",
-  "Strict-Transport-Security": "MISSING",
-  "X-Content-Type-Options": "MISSING",
-  "X-Frame-Options": "SAMEORIGIN",
-  "X-XSS-Protection": "0"
+  "Content-Security-Policy": "MISSING - Controla quais recursos podem ser carregados, protegendo contra XSS.",
+  "Permissions-Policy": "MISSING - Restringe acesso a APIs sensíveis como câmera e localização.",
+  "Referrer-Policy": "MISSING - Controla o que é enviado no cabeçalho Referer.",
+  "Strict-Transport-Security": "MISSING - Força uso de HTTPS, impedindo downgrade para HTTP.",
+  "X-Content-Type-Options": "MISSING - Impede que o browser interprete tipos de conteúdo incorretamente.",
+  "X-Frame-Options": "SAMEORIGIN ✓ (Evita que a página seja carregada dentro de frames (clickjacking).)",
+  "X-XSS-Protection": "0 ✓ (Ativa (ou desativa) proteção contra XSS no navegador.)"
  }
 }

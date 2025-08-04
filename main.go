@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"http-header-checker/checker"
 	"http-header-checker/report"
@@ -11,64 +12,73 @@ import (
 )
 
 func main() {
-	// Verifica se o usuário passou a url como argumento
-	if len(os.Args) < 2 {
-		fmt.Println("Uso: go run main.go <URL ou arquivo .txt>")
+	// Define as flags
+	urlFlag := flag.String("url", "", "URL única para verificar os headers")
+	fileFlag := flag.String("file", "", "Arquivo com lista de URLs")
+	outputFlag := flag.String("output", "relatorio.json", "Nome do arquivo de saída")
+
+	flag.Parse()
+
+	// Verificação (precisa passar pelo menos uma das flags)
+	if *urlFlag == "" && *fileFlag == "" {
+		fmt.Println("Você precisa passar -url ou -file.")
+		flag.Usage()
 		return
 	}
 
-	arg := os.Args[1] // Pega a url
+	var results []report.HeaderResult
 
-	if strings.HasSuffix(arg, ".txt") {
-		file, err := os.Open(arg)
+	// Se for uma URL única
+	if *urlFlag != "" {
+		result := processURL(*urlFlag)
+		results = append(results, result)
+	}
+
+	// Se for um arquivo com várias URLs
+	if *fileFlag != "" {
+		file, err := os.Open(*fileFlag)
 		if err != nil {
-			fmt.Println("Erro ao abrir arquivo:", err)
+			fmt.Println("Erro ao abrir o arquivo:", err)
 			return
 		}
 		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
-		count := 0
-
 		for scanner.Scan() {
-			url := scanner.Text()
+			url := strings.TrimSpace(scanner.Text())
 			if url == "" {
 				continue
 			}
-			count++
-			processURL(url, fmt.Sprintf("report_%d.json", count))
+			result := processURL(url)
+			results = append(results, result)
 		}
+	}
 
-		if err := scanner.Err(); err != nil {
-			fmt.Println("Erro ao ler arquivo:", err)
-		}
-
+	// Salva o relatório em JSON
+	err := report.SaveMultipleResultsToFile(results, *outputFlag)
+	if err != nil {
+		fmt.Println("Erro ao salvar relatório:", err)
 		return
 	}
 
-	processURL(arg, "report.json")
+	fmt.Println("Relatório salvo em:", *outputFlag)
 }
 
-func processURL(url string, output string) {
+func processURL(url string) report.HeaderResult {
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Printf("Erro ao acessar %s: %s\n", url, err)
-		return
+		return report.HeaderResult{
+			URL:     url,
+			Headers: map[string]string{"erro": err.Error()}}
 	}
 	defer resp.Body.Close()
 
 	fmt.Println("Analisando:", url)
 	results := checker.CheckSecurityHeaders(resp.Header)
 
-	reportData := report.HeaderResult{
+	return report.HeaderResult{
 		URL:     url,
 		Headers: results,
-	}
-
-	err = report.SaveResultToFile(reportData, output)
-	if err != nil {
-		fmt.Println("Erro ao salvar relatório:", err)
-	} else {
-		fmt.Printf("Relatório salvo: %s\n", output)
 	}
 }
